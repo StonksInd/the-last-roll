@@ -1,0 +1,76 @@
+<!-- templates/map.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RescueMap - Cartographie Offline</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+    <style>
+      #map {
+        height: 100vh;
+      }
+      .status-safe {
+        color: green;
+      }
+      .status-danger {
+        color: red;
+      }
+      .status-looted {
+        color: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+      // Initialisation de la carte avec tiles locales
+      const map = L.map("map").setView([48.8566, 2.3522], 13);
+
+      // Utilisation de tiles pré-téléchargées
+      L.tileLayer("/tiles/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "RescueMap Data",
+      }).addTo(map);
+
+      // Géolocalisation (si disponible)
+      map.locate({ setView: true, maxZoom: 16 });
+
+      // Chargement des supermarchés
+      function loadSupermarkets() {
+        const center = map.getCenter();
+        fetch(`/api/supermarkets?lat=${center.lat}&lon=${center.lng}&radius=5`)
+          .then((response) => response.json())
+          .then((data) => {
+            data.forEach((shop) => {
+              const marker = L.marker([shop.lat, shop.lon]).addTo(map)
+                .bindPopup(`
+                                <strong>${shop.name}</strong><br/>
+                                Type: ${shop.type}<br/>
+                                Statut: <span class="status-${shop.status}">${shop.status}</span><br/>
+                                <button onclick="updateStatus(${shop.id}, 'safe')">Sûr</button>
+                                <button onclick="updateStatus(${shop.id}, 'danger')">Dangereux</button>
+                            `);
+            });
+          });
+      }
+
+      function updateStatus(shopId, status) {
+        fetch("/api/update_status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: shopId, status: status }),
+        }).then(() => {
+          alert("Statut mis à jour!");
+          loadSupermarkets(); // Recharger
+        });
+      }
+
+      // Chargement initial
+      loadSupermarkets();
+    </script>
+  </body>
+</html>
