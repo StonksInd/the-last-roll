@@ -1,0 +1,19 @@
+{
+  "messages": [
+    {
+      "id": 1,
+      "user": "Utilisateur",
+      "message": "TEST",
+      "city": "Montauban",
+      "timestamp": "2025-09-23T10:14:49.745908"
+    },
+    {
+      "id": 2,
+      "user": "Utilisateur",
+      "message": "TEST 2",
+      "city": "Montauban",
+      "timestamp": "2025-09-23T10:15:01.857016"
+    }
+  ],
+  "last_updated": "2025-09-23T10:15:01.857016"
+}
